@@ -37,6 +37,7 @@ import os
 import re
 import codecs
 import warnings
+import logging
 
 from decimal import Decimal
 
@@ -802,25 +803,24 @@ class SinkParser:
                     ptr = self.object(substr, 0, Er)
                     # Esub = Er[0]
                     Esub = substr[:ptr]
-                    print(Esub)
+                    logging.debug(Esub)
 
                     Ev = []
                     ptr2 = self.verb(substr, ptr, Ev)
                     Epred = substr[ptr + 1:ptr2]
                     # Edir, Epred = Ev[0]
-                    print(Epred)
+                    logging.debug(Epred)
 
                     objs = []
                     ptr3 = self.objectList(substr, ptr2, objs)
                     # Eobj = objs[0]
                     Eobj = substr[ptr2 + 1:ptr3 - 1]
-                    print(Eobj)
+                    logging.debug(Eobj)
 
-                    argstr = argstr + "_:s" + str(BNodeNum) + " rdf:type rdf:Statement ; rdf:subject " + str(
-                        Esub) + " ; rdf:predicate " + str(Epred) + " ; rdf:object " + str(Eobj) + " .\n"
+                    argstr = argstr + "_:s" + str(BNodeNum) + " rdf:type rdf:Statement ; rdf:subject " + str(Esub) + " ; rdf:predicate " + str(Epred) + " ; rdf:object " + str(Eobj) + " .\n"
 
-                    print("Reified graph is as follows: ")
-                    print(argstr)
+                    logging.debug("Reified graph is as follows: ")
+                    logging.debug(argstr)
 
                 else:
                     i = i + 1
