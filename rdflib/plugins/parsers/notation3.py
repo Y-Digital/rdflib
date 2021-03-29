@@ -140,7 +140,10 @@ def join(here, there):
 
     # join('mid:foo@example', '../foo') bzzt
     if here[bcolonl + 1: bcolonl + 2] != "/":
-        raise ValueError("Base <%s> has no slash after " "colon - with relative '%s'." % (here, there))
+        raise ValueError(
+            "Base <%s> has no slash after "
+            "colon - with relative '%s'." %
+            (here, there))
 
     if here[bcolonl + 1: bcolonl + 3] == "//":
         bpath = here.find("/", bcolonl + 3)
@@ -162,7 +165,7 @@ def join(here, there):
 
     slashr = here.rfind("/")
 
-    while 1:
+    while True:
         if path[:2] == "./":
             path = path[2:]
         if path == ".":
@@ -314,7 +317,7 @@ escapeChars = "(_~.-!$&'()*+,;=/?#@%)"  # valid for \ escapes in localnames
 def unicodeExpand(m):
     try:
         return chr(int(m.group(1), 16))
-    except:
+    except BaseException:
         raise Exception("Invalid unicode code point: " + m.group(1))
 
 
@@ -324,7 +327,7 @@ unicodeEscape8 = re.compile(r"\\U([0-9a-fA-F]{8})")
 
 N3CommentCharacter = "#"  # For unix script  # ! compatabilty
 
-########################################## Parse string to sink
+# Parse string to sink
 #
 # Regular expressions:
 eol = re.compile(r"[ \t]*(#[^\n]*)?\r?\n")  # end  of line, poss. w/comment
@@ -357,8 +360,11 @@ class SinkParser:
 
         self._bindings = {}
 
-        self.bNodeCounter = 0  # Counter to keep track of number of Blank nodes used for reification
-        self.EmbeddedTriples = {}  # dictionary to keep track of embedded triples and what BlankNode they are mapped to
+        # Counter to keep track of number of Blank nodes used for reification
+        self.bNodeCounter = 0
+        # dictionary to keep track of embedded triples and what BlankNode they
+        # are mapped to
+        self.EmbeddedTriples = {}
 
         if thisDoc != "":
             assert ":" in thisDoc, "Document URI not absolute: <%s>" % thisDoc
@@ -372,7 +378,8 @@ class SinkParser:
         self.lines = 0  # for error handling
         self.startOfLine = 0  # For calculating character number
         self._genPrefix = genPrefix
-        self.keywords = ["a", "this", "bind", "has", "is", "of", "true", "false"]
+        self.keywords = ["a", "this", "bind",
+                         "has", "is", "of", "true", "false"]
         self.keywordsSet = 0  # Then only can others be considerd qnames
         self._anonymousNodes = {}
         # Dict of anon nodes already declared ln: Term
@@ -430,7 +437,8 @@ class SinkParser:
         _L1C1. It used to be used only for tracking, but for tests in general
         it makes the canonical ordering of bnodes repeatable."""
 
-        return "%s_L%iC%i" % (self._genPrefix, self.lines, i - self.startOfLine + 1)
+        return "%s_L%iC%i" % (self._genPrefix, self.lines,
+                              i - self.startOfLine + 1)
 
     def formula(self):
         return self._formula
@@ -468,7 +476,7 @@ class SinkParser:
             if j < 0:
                 return
 
-            s,i = self.directiveOrStatement(s, j)
+            s, i = self.directiveOrStatement(s, j)
             if i < 0:
                 # print("# next char: %s" % s[j])
                 self.BadSyntax(s, j, "expected directive or statement")
@@ -477,26 +485,27 @@ class SinkParser:
 
         i = self.skipSpace(argstr, h)
         if i < 0:
-            return argstr,i  # EOF
+            return argstr, i  # EOF
 
         if self.turtle:
             j = self.sparqlDirective(argstr, i)
             if j >= 0:
-                return argstr,j
+                return argstr, j
 
         j = self.directive(argstr, i)
         if j >= 0:
-            return argstr,self.checkDot(argstr, j)
+            return argstr, self.checkDot(argstr, j)
 
         # Check if the format is rdf* or not
-        # If it is then change the input string to replace star statment with reification
+        # If it is then change the input string to replace star statment with
+        # reification
         argstr = self.changeStarToReification(argstr, i)
 
         j = self.statement(argstr, i)
         if j >= 0:
-            return argstr,self.checkDot(argstr, j)
+            return argstr, self.checkDot(argstr, j)
 
-        return argstr,j
+        return argstr, j
 
     # @@I18N
     # _namechars = string.lowercase + string.uppercase + string.digits + '_-'
@@ -555,7 +564,8 @@ class SinkParser:
         j = self.tok("keywords", argstr, i)
         if j > 0:
             if self.turtle:
-                self.BadSyntax(argstr, i, "Found 'keywords' when in Turtle mode.")
+                self.BadSyntax(
+                    argstr, i, "Found 'keywords' when in Turtle mode.")
 
             i = self.commaSeparatedList(argstr, j, res, self.bareWord)
             if i < 0:
@@ -568,7 +578,8 @@ class SinkParser:
         j = self.tok("forAll", argstr, i)
         if j > 0:
             if self.turtle:
-                self.BadSyntax(argstr, i, "Found 'forAll' when in Turtle mode.")
+                self.BadSyntax(
+                    argstr, i, "Found 'forAll' when in Turtle mode.")
 
             i = self.commaSeparatedList(argstr, j, res, self.uri_ref2)
             if i < 0:
@@ -582,7 +593,8 @@ class SinkParser:
         j = self.tok("forSome", argstr, i)
         if j > 0:
             if self.turtle:
-                self.BadSyntax(argstr, i, "Found 'forSome' when in Turtle mode.")
+                self.BadSyntax(
+                    argstr, i, "Found 'forSome' when in Turtle mode.")
 
             i = self.commaSeparatedList(argstr, j, res, self.uri_ref2)
             if i < 0:
@@ -599,7 +611,8 @@ class SinkParser:
                 self.BadSyntax(argstr, j, "expected qname after @prefix")
             j = self.uri_ref2(argstr, i, t)
             if j < 0:
-                self.BadSyntax(argstr, i, "expected <uriref> after @prefix _qname_")
+                self.BadSyntax(
+                    argstr, i, "expected <uriref> after @prefix _qname_")
             ns = self.uriOf(t[1])
 
             if self._baseURI:
@@ -644,7 +657,6 @@ class SinkParser:
         return -1  # Not a directive, could be something else.
 
     def sparqlDirective(self, argstr, i):
-
         """
         turtle and trig support BASE/PREFIX without @ and without
         terminating .
@@ -662,7 +674,8 @@ class SinkParser:
                 self.BadSyntax(argstr, j, "expected qname after @prefix")
             j = self.uri_ref2(argstr, i, t)
             if j < 0:
-                self.BadSyntax(argstr, i, "expected <uriref> after @prefix _qname_")
+                self.BadSyntax(
+                    argstr, i, "expected <uriref> after @prefix _qname_")
             ns = self.uriOf(t[1])
 
             if self._baseURI:
@@ -735,48 +748,55 @@ class SinkParser:
         # print "# Parser output: ", `quadruple`
         self._store.makeStatement(quadruple, why=self._reason2)
 
-
     def getEmbeddedTuple(self, argstr, i):
-        i = i+2
-        j=i
-        while(argstr[j+1:j+3]!=">>"):
-            j = j+1
+        i = i + 2
+        j = i
+        while(argstr[j + 1:j + 3] != ">>"):
+            j = j + 1
 
-        substr = argstr[i:j+1] + " ."
-        return i,j,substr
+        substr = argstr[i:j + 1] + " ."
+        return i, j, substr
 
     def changeStarToReification(self, argstr, i):
         # Check if the Star statement is present anywhere in the given statement
         # Find the position and extract this embedded tuple
-        # The star statement could also be present as a subject or an object, check for that
+        # The star statement could also be present as a subject or an object,
+        # check for that
         if ("<<" in argstr and ">>" in argstr):
             while (i <= len(argstr)):
-                if (argstr[i:i + 2] == "<<"):  # We have found rdf* syntax with reification of subject
+                # We have found rdf* syntax with reification of subject
+                if (argstr[i:i + 2] == "<<"):
                     # Converting into rdf reification statement
-                    posStart, posEnd, substr = self.getEmbeddedTuple(argstr, i)  # Retrieve the Embedded Triple
-                    print (substr)
+                    posStart, posEnd, substr = self.getEmbeddedTuple(
+                        argstr, i)  # Retrieve the Embedded Triple
+                    print(substr)
 
                     # If recursive star statements present
                     while("<<" in substr):
                         argstr = self.changeStarToReification(argstr, posStart)
-                        posStart, posEnd, substr = self.getEmbeddedTuple(argstr, i)  # Retrieve the Embedded Triple
+                        posStart, posEnd, substr = self.getEmbeddedTuple(
+                            argstr, i)  # Retrieve the Embedded Triple
                         print(substr)
 
                     # Replace this embeddedTriple with a empty node
-                    # assign a number to this blank node for multiple reifications possible
+                    # assign a number to this blank node for multiple
+                    # reifications possible
                     if(substr not in self.EmbeddedTriples.keys()):
                         self.bNodeCounter += 1
                         BNodeNum = self.bNodeCounter
                         self.EmbeddedTriples[substr] = BNodeNum
                     else:
-                        # This embedded triple has already been re-ified once, use the same BNode number again
+                        # This embedded triple has already been re-ified once,
+                        # use the same BNode number again
                         BNodeNum = self.EmbeddedTriples[substr]
-                    argstr = argstr[:posStart - 2] + "_:s" + str(BNodeNum) + argstr[posEnd + 3:]
+                    argstr = argstr[:posStart - 2] + "_:s" + \
+                        str(BNodeNum) + argstr[posEnd + 3:]
                     # argstr = argstr[:posStart - 2] + "_:s" + argstr[posEnd + 3:]
 
                     # Add the reification triples
                     argstr = argstr + "\n" + substr + "\n"
-                    # Get the Subject, predicate and Object of the embedded triple
+                    # Get the Subject, predicate and Object of the embedded
+                    # triple
                     ptr = 0
                     Er = []
                     ptr = self.object(substr, 0, Er)
@@ -809,7 +829,8 @@ class SinkParser:
 
     def statement(self, argstr, i):
         r = []
-        i = self.object(argstr, i, r)  # Allow literal for subject - extends RDF
+        # Allow literal for subject - extends RDF
+        i = self.object(argstr, i, r)
         if i < 0:
             return i
 
@@ -979,7 +1000,8 @@ class SinkParser:
                     subj = objs[0]
                     if len(objs) > 1:
                         for obj in objs:
-                            self.makeStatement((self._context, DAML_sameAs, subj, obj))
+                            self.makeStatement(
+                                (self._context, DAML_sameAs, subj, obj))
                     j = self.skipSpace(argstr, j)
                     if j < 0:
                         self.BadSyntax(
@@ -1018,7 +1040,7 @@ class SinkParser:
                 j = i + 1
                 List = []
                 first_run = True
-                while 1:
+                while True:
                     i = self.skipSpace(argstr, j)
                     if i < 0:
                         self.BadSyntax(argstr, i, "needed '$}', found end.")
@@ -1035,9 +1057,11 @@ class SinkParser:
                         first_run = False
 
                     item = []
-                    j = self.item(argstr, i, item)  # @@@@@ should be path, was object
+                    # @@@@@ should be path, was object
+                    j = self.item(argstr, i, item)
                     if j < 0:
-                        self.BadSyntax(argstr, i, "expected item in set or '$}'")
+                        self.BadSyntax(
+                            argstr, i, "expected item in set or '$}'")
                     List.append(self._store.intern(item[0]))
                 res.append(self._store.newSet(List, self._context))
                 return j
@@ -1057,7 +1081,7 @@ class SinkParser:
                     subj = self._store.newFormula()
                 self._context = subj
 
-                while 1:
+                while True:
                     i = self.skipSpace(argstr, j)
                     if i < 0:
                         self.BadSyntax(argstr, i, "needed '}', found end.")
@@ -1088,7 +1112,7 @@ class SinkParser:
             j = i + 1
 
             List = []
-            while 1:
+            while True:
                 i = self.skipSpace(argstr, j)
                 if i < 0:
                     self.BadSyntax(argstr, i, "needed ')', found end.")
@@ -1097,7 +1121,8 @@ class SinkParser:
                     break
 
                 item = []
-                j = self.item(argstr, i, item)  # @@@@@ should be path, was object
+                # @@@@@ should be path, was object
+                j = self.item(argstr, i, item)
                 if j < 0:
                     self.BadSyntax(argstr, i, "expected item in list or ')'")
                 List.append(self._store.intern(item[0]))
@@ -1134,13 +1159,12 @@ class SinkParser:
         """Parse property list
         Leaves the terminating punctuation in the buffer
         """
-        while 1:
-            while 1:  # skip repeat ;
+        while True:
+            while True:  # skip repeat ;
                 j = self.skipSpace(argstr, i)
                 if j < 0:
                     self.BadSyntax(
-                        argstr, i, "EOF found when expected verb in property list"
-                    )
+                        argstr, i, "EOF found when expected verb in property list")
                 if argstr[j] != ";":
                     break
                 i = j + 1
@@ -1152,7 +1176,8 @@ class SinkParser:
                 res = []
                 j = self.node(argstr, i, res, subj)
                 if j < 0:
-                    self.BadSyntax(argstr, i, "bad {} or () or [] node after :- ")
+                    self.BadSyntax(
+                        argstr, i, "bad {} or () or [] node after :- ")
                 i = j
                 continue
             i = j
@@ -1192,7 +1217,7 @@ class SinkParser:
         if i < 0:
             return -1
 
-        while 1:
+        while True:
             j = self.skipSpace(argstr, i)
             if j < 0:
                 return j  # eof
@@ -1209,7 +1234,7 @@ class SinkParser:
         i = self.object(argstr, i, res)
         if i < 0:
             return -1
-        while 1:
+        while True:
             j = self.skipSpace(argstr, i)
             if j < 0:
                 self.BadSyntax(argstr, j, "EOF found after object")
@@ -1229,7 +1254,8 @@ class SinkParser:
             return j  # don't skip it
         if argstr[j: j + 1] == "]":
             return j
-        self.BadSyntax(argstr, j, "expected '.' or '}' or ']' at end of statement")
+        self.BadSyntax(
+            argstr, j, "expected '.' or '}' or ']' at end of statement")
 
     def uri_ref2(self, argstr, i, res):
         """Generate uri from n3 representation.
@@ -1255,7 +1281,8 @@ class SinkParser:
                     if not self.turtle and pfx == "":
                         ns = join(self._baseURI or "", "#")
                     else:
-                        self.BadSyntax(argstr, i, 'Prefix "%s:" not bound' % (pfx))
+                        self.BadSyntax(
+                            argstr, i, 'Prefix "%s:" not bound' % (pfx))
             symb = self._store.newSymbol(ns + ln)
             if symb in self._variables:
                 res.append(self._variables[symb])
@@ -1309,7 +1336,8 @@ class SinkParser:
             if j < 0:
                 return -1  # Forget varibles as a class, only in context.
             if v[0] in self.keywords:
-                self.BadSyntax(argstr, i, 'Keyword "%s" not allowed here.' % v[0])
+                self.BadSyntax(
+                    argstr, i, 'Keyword "%s" not allowed here.' % v[0])
             res.append(self._store.newSymbol(self._bindings[""] + v[0]))
             return j
         else:
@@ -1318,7 +1346,7 @@ class SinkParser:
     def skipSpace(self, argstr, i):
         """Skip white space, newlines and comments.
         return -1 if EOF, else position of first non-ws character"""
-        while 1:
+        while True:
             m = eol.match(argstr, i)
             if m is None:
                 break
@@ -1346,7 +1374,8 @@ class SinkParser:
         j = j + 1
         i = j
         if argstr[j] in "0123456789-":
-            self.BadSyntax(argstr, j, "Varible name can't start with '%s'" % argstr[j])
+            self.BadSyntax(
+                argstr, j, "Varible name can't start with '%s'" % argstr[j])
         while i < len(argstr) and argstr[i] not in _notKeywordsChars:
             i = i + 1
         if self._parentContext is None:
@@ -1468,8 +1497,11 @@ class SinkParser:
 
             if lastslash:
                 raise BadSyntax(
-                    self._thisDoc, self.line, argstr, i, "qname cannot end with \\"
-                )
+                    self._thisDoc,
+                    self.line,
+                    argstr,
+                    i,
+                    "qname cannot end with \\")
 
             if argstr[i - 1] == ".":
                 # localname cannot end in .
@@ -1564,7 +1596,8 @@ class SinkParser:
                             startline,
                             argstr,
                             i,
-                            "Bad language code syntax on string " + "literal, after @",
+                            "Bad language code syntax on string " +
+                            "literal, after @",
                         )
                     i = m.end()
                     lang = argstr[j + 1: i]
@@ -1602,7 +1635,8 @@ class SinkParser:
                 if (
                     delim == delim3
                 ):  # done when delim is """ or ''' and, respectively ...
-                    if argstr[j: j + 5] == delim5:  # ... we have "" or '' before
+                    if argstr[j: j +
+                              5] == delim5:  # ... we have "" or '' before
                         i = j + 5
                         ustr = ustr + delim2
                         return i, ustr
@@ -1610,7 +1644,8 @@ class SinkParser:
                         i = j + 4
                         ustr = ustr + delim1
                         return i, ustr
-                    if argstr[j: j + 3] == delim3:  # current " or ' is part of delim
+                    if argstr[j: j +
+                              3] == delim3:  # current " or ' is part of delim
                         i = j + 3
                         return i, ustr
 
@@ -1696,12 +1731,12 @@ class SinkParser:
 
     def _unicodeEscape(self, argstr, i, startline, reg, n, prefix):
         if len(argstr) < i + n:
-            raise BadSyntax(
-                self._thisDoc, startline, argstr, i, "unterminated string literal(3)"
-            )
+            raise BadSyntax(self._thisDoc, startline, argstr,
+                            i, "unterminated string literal(3)")
         try:
-            return i + n, reg.sub(unicodeExpand, "\\" + prefix + argstr[i: i + n])
-        except:
+            return i + n, reg.sub(unicodeExpand, "\\" +
+                                  prefix + argstr[i: i + n])
+        except BaseException:
             raise BadSyntax(
                 self._thisDoc,
                 startline,
@@ -1726,7 +1761,8 @@ class SinkParser:
 
 class BadSyntax(SyntaxError):
     def __init__(self, uri, lines, argstr, i, why):
-        self._str = argstr.encode("utf-8")  # Better go back to strings for errors
+        # Better go back to strings for errors
+        self._str = argstr.encode("utf-8")
         self._i = i
         self._why = why
         self.lines = lines
@@ -1773,7 +1809,8 @@ class Formula(object):
         self.existentials = {}
         self.universals = {}
 
-        self.quotedgraph = QuotedGraph(store=parent.store, identifier=self.id())
+        self.quotedgraph = QuotedGraph(
+            store=parent.store, identifier=self.id())
 
     def __str__(self):
         return "_:Formula%s" % self.number
@@ -1841,8 +1878,10 @@ class RDFSink(object):
         if not n:
             return nil
 
-        first = self.newSymbol("http://www.w3.org/1999/02/22-rdf-syntax-ns#first")
-        rest = self.newSymbol("http://www.w3.org/1999/02/22-rdf-syntax-ns#rest")
+        first = self.newSymbol(
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#first")
+        rest = self.newSymbol(
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest")
         af = a = self.newBlankNode(f)
 
         for ne in n[:-1]:
@@ -1968,13 +2007,14 @@ class TurtleParser(Parser):
 
         if encoding not in [None, "utf-8"]:
             raise Exception(
-                ("N3/Turtle files are always utf-8 encoded, ", "I was passed: %s")
-                % encoding
-            )
+                ("N3/Turtle files are always utf-8 encoded, ",
+                 "I was passed: %s") %
+                encoding)
 
         sink = RDFSink(graph)
 
-        baseURI = graph.absolutize(source.getPublicId() or source.getSystemId() or "")
+        baseURI = graph.absolutize(
+            source.getPublicId() or source.getSystemId() or "")
         p = SinkParser(sink, baseURI=baseURI, turtle=turtle)
 
         p.loadStream(source.getByteStream())
@@ -1992,6 +2032,58 @@ class N3Parser(TurtleParser):
 
     """
 
+    def __init__(self):
+        pass
+
+    def parse(self, source, graph, encoding="utf-8"):
+        # we're currently being handed a Graph, not a ConjunctiveGraph
+        assert graph.store.context_aware  # is this implied by formula_aware
+        assert graph.store.formula_aware
+
+        conj_graph = ConjunctiveGraph(store=graph.store)
+        conj_graph.default_context = graph  # TODO: CG __init__ should have a
+        # default_context arg
+        # TODO: update N3Processor so that it can use conj_graph as the sink
+        conj_graph.namespace_manager = graph.namespace_manager
+
+        TurtleParser.parse(self, source, conj_graph, encoding, turtle=False)
+
+
+def _test():  # pragma: no cover
+    import doctest
+
+    doctest.testmod()
+
+
+# if __name__ == '__main__':
+#    _test()
+
+
+def main():  # pragma: no cover
+    g = ConjunctiveGraph()
+
+    sink = RDFSink(g)
+    base_uri = "file://" + os.path.join(os.getcwd(), sys.argv[1])
+
+    p = SinkParser(sink, baseURI=base_uri)
+    p._bindings[""] = p._baseURI + "#"
+    p.startDoc()
+
+    f = open(sys.argv[1], "rb")
+    rdbytes = f.read()
+    f.close()
+
+    p.feed(rdbytes)
+    p.endDoc()
+    for t in g.quads((None, None, None)):
+
+        print(t)
+
+
+if __name__ == "__main__":
+    main()
+
+# ends
     def __init__(self):
         pass
 
