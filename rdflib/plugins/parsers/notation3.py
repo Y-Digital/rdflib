@@ -770,14 +770,14 @@ class SinkParser:
                     # Converting into rdf reification statement
                     posStart, posEnd, substr = self.getEmbeddedTuple(
                         argstr, i)  # Retrieve the Embedded Triple
-                    print(substr)
+                    logging.debug(substr)
 
                     # If recursive star statements present
                     while("<<" in substr):
                         argstr = self.changeStarToReification(argstr, posStart)
                         posStart, posEnd, substr = self.getEmbeddedTuple(
                             argstr, i)  # Retrieve the Embedded Triple
-                        print(substr)
+                        logging.debug(substr)
 
                     # Replace this embeddedTriple with a empty node
                     # assign a number to this blank node for multiple
@@ -2077,7 +2077,7 @@ def main():  # pragma: no cover
     p.endDoc()
     for t in g.quads((None, None, None)):
 
-        print(t)
+        logging.debug(t)
 
 
 if __name__ == "__main__":
@@ -2129,7 +2129,7 @@ def main():  # pragma: no cover
     p.endDoc()
     for t in g.quads((None, None, None)):
 
-        print(t)
+        logging.debug(t)
 
 
 if __name__ == "__main__":
