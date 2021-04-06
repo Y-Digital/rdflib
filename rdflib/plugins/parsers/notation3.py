@@ -38,6 +38,8 @@ import re
 import codecs
 import warnings
 import logging
+logging.basicConfig()
+logger = logging.getLogger(__name__)
 
 from decimal import Decimal
 
@@ -770,14 +772,14 @@ class SinkParser:
                     # Converting into rdf reification statement
                     posStart, posEnd, substr = self.getEmbeddedTuple(
                         argstr, i)  # Retrieve the Embedded Triple
-                    logging.debug(substr)
+                    logger.debug(substr)
 
                     # If recursive star statements present
                     while("<<" in substr):
                         argstr = self.changeStarToReification(argstr, posStart)
                         posStart, posEnd, substr = self.getEmbeddedTuple(
                             argstr, i)  # Retrieve the Embedded Triple
-                        logging.debug(substr)
+                        logger.debug(substr)
 
                     # Replace this embeddedTriple with a empty node
                     # assign a number to this blank node for multiple
@@ -803,24 +805,24 @@ class SinkParser:
                     ptr = self.object(substr, 0, Er)
                     # Esub = Er[0]
                     Esub = substr[:ptr]
-                    logging.debug(Esub)
+                    logger.debug(Esub)
 
                     Ev = []
                     ptr2 = self.verb(substr, ptr, Ev)
                     Epred = substr[ptr + 1:ptr2]
                     # Edir, Epred = Ev[0]
-                    logging.debug(Epred)
+                    logger.debug(Epred)
 
                     objs = []
                     ptr3 = self.objectList(substr, ptr2, objs)
                     # Eobj = objs[0]
                     Eobj = substr[ptr2 + 1:ptr3 - 1]
-                    logging.debug(Eobj)
+                    logger.debug(Eobj)
 
                     argstr = argstr + "_:s" + str(BNodeNum) + " rdf:type rdf:Statement ; rdf:subject " + str(Esub) + " ; rdf:predicate " + str(Epred) + " ; rdf:object " + str(Eobj) + " .\n"
 
-                    logging.debug("Reified graph is as follows: ")
-                    logging.debug(argstr)
+                    logger.debug("Reified graph is as follows: ")
+                    logger.debug(argstr)
 
                 else:
                     i = i + 1
@@ -2077,7 +2079,7 @@ def main():  # pragma: no cover
     p.endDoc()
     for t in g.quads((None, None, None)):
 
-        logging.debug(t)
+        logger.debug(t)
 
 
 if __name__ == "__main__":
@@ -2129,7 +2131,7 @@ def main():  # pragma: no cover
     p.endDoc()
     for t in g.quads((None, None, None)):
 
-        logging.debug(t)
+        logger.debug(t)
 
 
 if __name__ == "__main__":
